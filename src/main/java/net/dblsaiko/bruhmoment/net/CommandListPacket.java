@@ -15,7 +15,7 @@ import java.util.List;
 
 import io.netty.buffer.Unpooled;
 
-import net.dblsaiko.bruhmoment.CommandList;
+import net.dblsaiko.bruhmoment.util.list.CommandList;
 
 public class CommandListPacket<T> {
 

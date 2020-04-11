@@ -1,4 +1,4 @@
-package net.dblsaiko.bruhmoment;
+package net.dblsaiko.bruhmoment.util;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
@@ -12,6 +12,8 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.GameMode;
+
+import net.dblsaiko.bruhmoment.Configuration;
 
 public class Util {
 
@@ -31,7 +33,7 @@ public class Util {
         Identifier blockId = Registry.BLOCK.getId(target.getBlock());
         ItemStack item = source.getStackInHand(hand);
         Identifier itemId = Registry.ITEM.getId(item.getItem());
-        if (Configuration.blockInteractBlacklist.stream().anyMatch(e -> e.blockId.equals(blockId) && e.itemId.matches(itemId))) {
+        if (Configuration.blockInteractBlacklist.stream().anyMatch(e -> e.blockId.matches(blockId) && e.itemId.matches(itemId))) {
             return false;
         }
         return true;

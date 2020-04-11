@@ -1,6 +1,8 @@
-package net.dblsaiko.bruhmoment;
+package net.dblsaiko.bruhmoment.util.list;
 
 import java.util.Objects;
+
+import net.dblsaiko.bruhmoment.util.IdentifierFilter;
 
 public class EntityEntry {
 
@@ -23,7 +25,7 @@ public class EntityEntry {
     }
 
     public String[] toArgs() {
-        return new String[]{entityId.toString(), itemId.asString()};
+        return new String[]{entityId.asString(), itemId.asString()};
     }
 
     @Override

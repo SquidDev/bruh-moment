@@ -1,6 +1,8 @@
-package net.dblsaiko.bruhmoment;
+package net.dblsaiko.bruhmoment.util.list;
 
 import java.util.Objects;
+
+import net.dblsaiko.bruhmoment.util.IdentifierFilter;
 
 public class BlockEntry {
 
@@ -23,7 +25,7 @@ public class BlockEntry {
     }
 
     public String[] toArgs() {
-        return new String[]{blockId.toString(), itemId.asString()};
+        return new String[]{blockId.asString(), itemId.asString()};
     }
 
     @Override

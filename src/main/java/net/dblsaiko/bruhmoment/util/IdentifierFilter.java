@@ -1,6 +1,7 @@
-package net.dblsaiko.bruhmoment;
+package net.dblsaiko.bruhmoment.util;
 
 import net.minecraft.util.Identifier;
+import net.minecraft.util.InvalidIdentifierException;
 
 import java.util.Objects;
 
@@ -20,8 +21,8 @@ public interface IdentifierFilter {
 
     static IdentifierFilter from(String string) {
         if ("-".equals(string)) return any();
-        else if (string.startsWith("!")) return excluding(new Identifier(string.substring(1)));
-        else return including(new Identifier(string));
+        else if (string.startsWith("!")) return excluding(Impl.tryParseId(string.substring(1)));
+        else return including(Impl.tryParseId(string));
     }
 
     boolean matches(Identifier id);
@@ -31,6 +32,14 @@ public interface IdentifierFilter {
     class Impl {
 
         private Impl() {
+        }
+
+        private static Identifier tryParseId(String s ) {
+            try {
+                return new Identifier(s);
+            } catch (InvalidIdentifierException e) {
+                return new Identifier("", "");
+            }
         }
 
         private static class Any implements IdentifierFilter {

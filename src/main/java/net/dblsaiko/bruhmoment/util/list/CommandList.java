@@ -1,4 +1,4 @@
-package net.dblsaiko.bruhmoment;
+package net.dblsaiko.bruhmoment.util.list;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
@@ -18,6 +18,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import net.dblsaiko.bruhmoment.BruhMoment;
 import net.dblsaiko.bruhmoment.net.CommandListPacket;
 import net.dblsaiko.qcommon.cfg.core.api.ConfigApi;
 import net.dblsaiko.qcommon.cfg.core.api.ExecSource;
@@ -32,12 +33,14 @@ public class CommandList<T> implements PersistenceListener, SyncListener, Iterab
     private final List<T> entries = new ArrayList<>();
 
     public final String name;
+    private final String desc;
     public final Function<String[], T> parser;
     public final Function<T, String[]> serializer;
     public final CommandListPacket.Type<T> packetType;
 
-    public CommandList(String name, Function<String[], T> parser, Function<T, String[]> serializer) {
+    public CommandList(String name, String desc, Function<String[], T> parser, Function<T, String[]> serializer) {
         this.name = name;
+        this.desc = desc;
         this.parser = parser;
         this.serializer = serializer;
         this.packetType = new CommandListPacket.Type<>(this);
@@ -101,6 +104,7 @@ public class CommandList<T> implements PersistenceListener, SyncListener, Iterab
         ConfigApi api = ConfigApi.getInstance();
         persistenceContext.write("bruhmoment", linePrinter -> {
             linePrinter.print();
+            Arrays.stream(desc.split("\n")).map(s -> String.format("// %s", s)).forEach(linePrinter::print);
             linePrinter.printf(api.escape(String.format("%s_clear", name)));
             entries.stream()
                 .map(serializer)
