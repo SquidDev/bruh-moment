@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "net.dblsaiko.bruhmoment.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "ClientPlayerInteractionManagerMixin",
+    "ServerPlayerInteractionManagerMixin",
+    "ServerPlayNetworkHandlerMixin"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
