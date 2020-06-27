@@ -34,17 +34,17 @@ public class ServerPlayNetworkHandlerMixin {
         cancellable = true
     )
     private void onInteract(PlayerInteractEntityC2SPacket rpacket, CallbackInfo ci) {
-        ServerWorld serverWorld = this.server.getWorld(this.player.dimension);
+        ServerWorld serverWorld = this.player.getServerWorld();
         Entity entity = rpacket.getEntity(serverWorld);
         switch(rpacket.getType()) {
             case INTERACT:
             case INTERACT_AT:
-                if (!Util.canInteract(player, entity, rpacket.getHand())) {
+                if (!Util.canInteract(this.player, entity, rpacket.getHand())) {
                     ci.cancel();
                 }
                 break;
             case ATTACK:
-                if (!Util.canAttack(player, entity)) {
+                if (!Util.canAttack(this.player, entity)) {
                     ci.cancel();
                 }
                 break;
