@@ -28,7 +28,6 @@ import net.dblsaiko.bruhmoment.util.Util;
 
 @Mixin(ClientPlayerInteractionManager.class)
 public class ClientPlayerInteractionManagerMixin {
-
     @Shadow @Final private ClientPlayNetworkHandler networkHandler;
 
     @Inject(
@@ -103,10 +102,10 @@ public class ClientPlayerInteractionManagerMixin {
     private void onInteract(ClientPlayerEntity player, ClientWorld world, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> cir) {
         BlockPos pos = hitResult.getBlockPos();
         BlockState state = world.getBlockState(pos);
+
         if (!Util.canInteract(player, state, hand)) {
-            networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(hand, hitResult));
+            this.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(hand, hitResult));
             cir.setReturnValue(ActionResult.FAIL);
         }
     }
-
 }

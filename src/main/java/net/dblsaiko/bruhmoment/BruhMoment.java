@@ -9,7 +9,6 @@ import net.dblsaiko.qcommon.cfg.core.api.ConfigApi;
 import net.dblsaiko.qcommon.cfg.core.cvar.CvarSyncManager;
 
 public class BruhMoment implements ModInitializer {
-
     // TODO: actually make this accessible from cfg's side
     public static CvarSyncManager csm;
 
@@ -22,7 +21,7 @@ public class BruhMoment implements ModInitializer {
         } catch (IllegalAccessException | NoSuchFieldException e) {
             throw new RuntimeException(e);
         }
+
         Configuration.init();
     }
-
 }

@@ -19,7 +19,6 @@ import net.dblsaiko.bruhmoment.util.Util;
 
 @Mixin(ServerPlayerInteractionManager.class)
 public class ServerPlayerInteractionManagerMixin {
-
     @Inject(
         method = "interactBlock(Lnet/minecraft/server/network/ServerPlayerEntity;Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/Hand;Lnet/minecraft/util/hit/BlockHitResult;)Lnet/minecraft/util/ActionResult;",
         at = @At("HEAD"),
@@ -28,6 +27,7 @@ public class ServerPlayerInteractionManagerMixin {
     private void onInteract(ServerPlayerEntity player, World world, ItemStack stack, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> cir) {
         BlockPos pos = hitResult.getBlockPos();
         BlockState state = world.getBlockState(pos);
+
         if (!Util.canInteract(player, state, hand)) {
             cir.setReturnValue(ActionResult.FAIL);
         }
@@ -43,5 +43,4 @@ public class ServerPlayerInteractionManagerMixin {
             cir.setReturnValue(ActionResult.FAIL);
         }
     }
-
 }

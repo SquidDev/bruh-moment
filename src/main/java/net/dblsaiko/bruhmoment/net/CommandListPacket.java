@@ -1,13 +1,12 @@
 package net.dblsaiko.bruhmoment.net;
 
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
-
 import net.fabricmc.api.EnvType;
-import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
-import net.fabricmc.fabric.api.network.PacketContext;
-import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 
 import java.util.ArrayList;
@@ -18,7 +17,6 @@ import io.netty.buffer.Unpooled;
 import net.dblsaiko.bruhmoment.util.list.CommandList;
 
 public class CommandListPacket<T> {
-
     public final Type<T> type;
 
     public final List<T> data;
@@ -28,38 +26,39 @@ public class CommandListPacket<T> {
         this.data = data;
     }
 
-    public void handle(PacketContext ctx) {
-        ctx.getTaskQueue().execute(() -> {
-            type.list.clear();
-            type.list.addAll(data);
+    public void handle(MinecraftClient client) {
+        client.execute(() -> {
+            this.type.list.clear();
+            this.type.list.addAll(this.data);
         });
     }
 
     public void toBuffer(PacketByteBuf buffer) {
-        buffer.writeVarInt(data.size());
-        for (T el : data) {
-            String[] strings = type.list.serializer.apply(el);
+        buffer.writeVarInt(this.data.size());
+
+        for (T el : this.data) {
+            String[] strings = this.type.list.serializer.apply(el);
             buffer.writeVarInt(strings.length);
+
             for (String string : strings) {
                 buffer.writeString(string);
             }
         }
     }
 
-    public void sendTo(PlayerEntity player) {
+    public void sendTo(ServerPlayerEntity player) {
         PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
-        toBuffer(buf);
-        ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, type.packetId, buf);
+        this.toBuffer(buf);
+        ServerPlayNetworking.send(player, this.type.packetId, buf);
     }
 
     public static class Type<T> {
-
-        final CommandList<T> list;
+        private final CommandList<T> list;
         public final Identifier packetId;
 
         public Type(CommandList<T> list) {
             this.list = list;
-            packetId = new Identifier("bruh-moment", String.format("packet_list_%s", list.name));
+            this.packetId = new Identifier("bruh-moment", String.format("packet_list_%s", list.name));
         }
 
         public CommandListPacket<T> fromBuffer(PacketByteBuf buffer) {
@@ -83,10 +82,8 @@ public class CommandListPacket<T> {
 
         public void register() {
             if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
-                ClientSidePacketRegistry.INSTANCE.register(packetId, (packetContext, packetByteBuf) -> fromBuffer(packetByteBuf).handle(packetContext));
+                ClientPlayNetworking.registerGlobalReceiver(this.packetId, (client, handler, buf, responseSender) -> this.fromBuffer(buf).handle(client));
             }
         }
-
     }
-
 }

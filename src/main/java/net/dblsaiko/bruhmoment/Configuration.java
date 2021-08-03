@@ -9,7 +9,6 @@ import net.dblsaiko.qcommon.cfg.core.api.cvar.BoolConVar;
 import net.dblsaiko.qcommon.cfg.core.api.cvar.CvarOptions;
 
 public class Configuration {
-
     public static BoolConVar filterSurvival = null;
     public static BoolConVar filterCreative = null;
     public static BoolConVar filterAdventure = null;
@@ -39,5 +38,4 @@ public class Configuration {
         blockInteractBlacklist.register(api);
         itemInteractBlacklist.register(api);
     }
-
 }

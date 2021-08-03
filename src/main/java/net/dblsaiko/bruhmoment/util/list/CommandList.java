@@ -2,8 +2,9 @@ package net.dblsaiko.bruhmoment.util.list;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.fabricmc.api.EnvType;
-import net.fabricmc.fabric.api.server.PlayerStream;
+import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.loader.api.FabricLoader;
 
 import java.util.ArrayList;
@@ -29,7 +30,6 @@ import net.dblsaiko.qcommon.cfg.core.api.persistence.PersistenceListener;
 import net.dblsaiko.qcommon.cfg.core.api.sync.SyncListener;
 
 public class CommandList<T> implements PersistenceListener, SyncListener, Iterable<T> {
-
     private final List<T> entries = new ArrayList<>();
 
     public final String name;
@@ -47,56 +47,56 @@ public class CommandList<T> implements PersistenceListener, SyncListener, Iterab
     }
 
     public void register(ConfigApi.Mutable api) {
-        api.addCommand(String.format("%s_add", name), this::add);
-        api.addCommand(String.format("%s_clear", name), this::clear);
-        api.addCommand(String.format("%s_del", name), this::remove);
-        api.addCommand(String.format("%s_list", name), this::list);
+        api.addCommand(String.format("%s_add", this.name), this::add);
+        api.addCommand(String.format("%s_clear", this.name), this::clear);
+        api.addCommand(String.format("%s_del", this.name), this::remove);
+        api.addCommand(String.format("%s_list", this.name), this::list);
         api.registerPersistenceListener(this);
         api.registerSyncListener(this);
-        packetType.register();
+        this.packetType.register();
     }
 
     public void clear() {
-        entries.clear();
+        this.entries.clear();
     }
 
     public void add(T element) {
-        entries.add(element);
+        this.entries.add(element);
     }
 
     public void remove(T element) {
-        entries.remove(element);
+        this.entries.remove(element);
     }
 
     public void addAll(Collection<? extends T> data) {
-        entries.addAll(data);
+        this.entries.addAll(data);
     }
 
     @Override
     public Iterator<T> iterator() {
-        return entries.iterator();
+        return this.entries.iterator();
     }
 
     @Override
     public void forEach(Consumer<? super T> action) {
-        entries.forEach(action);
+        this.entries.forEach(action);
     }
 
     public boolean contains(Object element) {
-        return entries.contains(element);
+        return this.entries.contains(element);
     }
 
     @Override
     public Spliterator<T> spliterator() {
-        return entries.spliterator();
+        return this.entries.spliterator();
     }
 
     public Stream<T> stream() {
-        return entries.stream();
+        return this.entries.stream();
     }
 
     public Stream<T> parallelStream() {
-        return entries.parallelStream();
+        return this.entries.parallelStream();
     }
 
     @Override
@@ -104,18 +104,18 @@ public class CommandList<T> implements PersistenceListener, SyncListener, Iterab
         ConfigApi api = ConfigApi.getInstance();
         persistenceContext.write("bruhmoment", linePrinter -> {
             linePrinter.print();
-            Arrays.stream(desc.split("\n")).map(s -> String.format("// %s", s)).forEach(linePrinter::print);
-            linePrinter.printf(api.escape(String.format("%s_clear", name)));
-            entries.stream()
-                .map(serializer)
+            Arrays.stream(this.desc.split("\n")).map(s -> String.format("// %s", s)).forEach(linePrinter::print);
+            linePrinter.printf(api.escape(String.format("%s_clear", this.name)));
+            this.entries.stream()
+                .map(this.serializer)
                 .map(arr -> Arrays.stream(arr).map(api::escape).collect(Collectors.joining(" ")))
-                .forEach(s -> linePrinter.printf("%s %s", api.escape(String.format("%s_add", name)), s));
+                .forEach(s -> linePrinter.printf("%s %s", api.escape(String.format("%s_add", this.name)), s));
         });
     }
 
     @Override
     public void updateAll(Set<PlayerEntity> players) {
-        players.forEach(player -> packetType.of(entries).sendTo(player));
+        players.forEach(player -> this.packetType.of(this.entries).sendTo((ServerPlayerEntity) player));
     }
 
     private void add(String[] strings, ExecSource execSource, LinePrinter linePrinter, ControlFlow controlFlow) {
@@ -123,10 +123,11 @@ public class CommandList<T> implements PersistenceListener, SyncListener, Iterab
             linePrinter.print("cvar is locked by server");
             return;
         }
-        T element = parser.apply(strings);
+
+        T element = this.parser.apply(strings);
         if (element == null) return;
-        add(element);
-        onUpdate();
+        this.add(element);
+        this.onUpdate();
     }
 
     private void clear(String[] strings, ExecSource execSource, LinePrinter linePrinter, ControlFlow controlFlow) {
@@ -134,8 +135,9 @@ public class CommandList<T> implements PersistenceListener, SyncListener, Iterab
             linePrinter.print("cvar is locked by server");
             return;
         }
-        clear();
-        onUpdate();
+
+        this.clear();
+        this.onUpdate();
     }
 
     private void remove(String[] strings, ExecSource execSource, LinePrinter linePrinter, ControlFlow controlFlow) {
@@ -143,26 +145,26 @@ public class CommandList<T> implements PersistenceListener, SyncListener, Iterab
             linePrinter.print("cvar is locked by server");
             return;
         }
-        T element = parser.apply(strings);
+
+        T element = this.parser.apply(strings);
         if (element == null) return;
-        remove(element);
-        onUpdate();
+        this.remove(element);
+        this.onUpdate();
     }
 
     private void list(String[] strings, ExecSource execSource, LinePrinter linePrinter, ControlFlow controlFlow) {
         ConfigApi api = ConfigApi.getInstance();
-        entries.stream()
-            .map(serializer)
+        this.entries.stream()
+            .map(this.serializer)
             .map(arr -> Arrays.stream(arr).map(api::escape).collect(Collectors.joining(" ")))
             .forEach(linePrinter::print);
     }
 
     private void onUpdate() {
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER) {
-            PlayerStream.all((MinecraftServer) FabricLoader.getInstance().getGameInstance()).forEach(player -> {
-                packetType.of(entries).sendTo(player);
+            PlayerLookup.all((MinecraftServer) FabricLoader.getInstance().getGameInstance()).forEach(player -> {
+                this.packetType.of(this.entries).sendTo(player);
             });
         }
     }
-
 }

@@ -6,7 +6,6 @@ import net.minecraft.util.InvalidIdentifierException;
 import java.util.Objects;
 
 public interface IdentifierFilter {
-
     static IdentifierFilter any() {
         return Impl.Any.INSTANCE;
     }
@@ -20,9 +19,13 @@ public interface IdentifierFilter {
     }
 
     static IdentifierFilter from(String string) {
-        if ("-".equals(string)) return any();
-        else if (string.startsWith("!")) return excluding(Impl.tryParseId(string.substring(1)));
-        else return including(Impl.tryParseId(string));
+        if ("-".equals(string)) {
+            return any();
+        } else if (string.startsWith("!")) {
+            return excluding(Impl.tryParseId(string.substring(1)));
+        } else {
+            return including(Impl.tryParseId(string));
+        }
     }
 
     boolean matches(Identifier id);
@@ -30,7 +33,6 @@ public interface IdentifierFilter {
     String asString();
 
     class Impl {
-
         private Impl() {
         }
 
@@ -43,7 +45,6 @@ public interface IdentifierFilter {
         }
 
         private static class Any implements IdentifierFilter {
-
             public static final Any INSTANCE = new Any();
 
             private Any() {
@@ -58,11 +59,9 @@ public interface IdentifierFilter {
             public String asString() {
                 return "-";
             }
-
         }
 
         private static class Including implements IdentifierFilter {
-
             private final Identifier id;
 
             public Including(Identifier id) {
@@ -76,30 +75,29 @@ public interface IdentifierFilter {
 
             @Override
             public String asString() {
-                return id.toString();
+                return this.id.toString();
             }
 
             @Override
             public boolean equals(Object o) {
                 if (this == o) return true;
-                if (o == null || getClass() != o.getClass()) return false;
+                if (o == null || this.getClass() != o.getClass()) return false;
                 Including including = (Including) o;
-                return Objects.equals(id, including.id);
+                return Objects.equals(this.id, including.id);
             }
 
             @Override
             public int hashCode() {
-                return Objects.hash(id);
+                return Objects.hash(this.id);
             }
 
             @Override
             public String toString() {
-                return String.format("IdentifierFilter::Including { id: %s }", id);
+                return String.format("IdentifierFilter::Including { id: %s }", this.id);
             }
         }
 
         private static class Excluding implements IdentifierFilter {
-
             private final Identifier id;
 
             public Excluding(Identifier id) {
@@ -113,30 +111,26 @@ public interface IdentifierFilter {
 
             @Override
             public String asString() {
-                return String.format("!%s", id);
+                return String.format("!%s", this.id);
             }
 
             @Override
             public boolean equals(Object o) {
                 if (this == o) return true;
-                if (o == null || getClass() != o.getClass()) return false;
+                if (o == null || this.getClass() != o.getClass()) return false;
                 Excluding excluding = (Excluding) o;
-                return Objects.equals(id, excluding.id);
+                return Objects.equals(this.id, excluding.id);
             }
 
             @Override
             public int hashCode() {
-                return Objects.hash(id);
+                return Objects.hash(this.id);
             }
 
             @Override
             public String toString() {
-                return String.format("IdentifierFilter::Excluding { id: %s }", id);
+                return String.format("IdentifierFilter::Excluding { id: %s }", this.id);
             }
-
         }
-
     }
-
-
 }
